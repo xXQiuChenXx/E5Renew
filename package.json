@@ -1,0 +1,24 @@
+{
+  "name": "e5renew",
+  "version": "1.0.0",
+  "description": "Renew E5 Subscription by using API calls.",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xXQiuChenXx/E5Renew.git"
+  },
+  "keywords": [
+    "E5",
+    "renew",
+    "ts"
+  ],
+  "author": "QiuChen",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/xXQiuChenXx/E5Renew/issues"
+  },
+  "homepage": "https://github.com/xXQiuChenXx/E5Renew#readme"
+}
