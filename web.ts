@@ -9,5 +9,6 @@ app.get("/", async function(req: Request, res: Response) {
 })
 
 app.listen(settings.port);
+console.log("testing")
 
 export default app;
