@@ -1,5 +1,5 @@
 // @ts-ignore
-import express, { Express, Request, Response , Application } from 'web';
+import express, { Express, Request, Response , Application } from 'express';
 import settings from 'config';
 
 const app: Express = express();

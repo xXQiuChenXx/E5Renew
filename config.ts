@@ -1,6 +1,8 @@
 // Copyright (c) MyItBuilder. All rights reserved.
 // Licensed under the MIT license.
 
+import "dotenv/config"
+
 const settings = {
     'clientId': process.env.CLIENT_ID || "",
     "port": process.env.PORT || "",
