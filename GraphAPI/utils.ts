@@ -121,7 +121,7 @@ module.exports = class GraphAPI {
       console.log(
         "================================================================"
       );
-    } catch (error) {
+    } catch (error: any) {
       console.log(error.message);
     }
   }
