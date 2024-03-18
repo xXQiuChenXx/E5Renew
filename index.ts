@@ -1,3 +1,3 @@
-import webserver from "./web"
+import webserver from "./web/main"
 
 console.log(webserver);
