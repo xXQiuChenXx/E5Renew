@@ -1,4 +1,4 @@
-const Downloader = require("nodejs-file-downloader");
+import Downloader from "nodejs-file-downloader";
 const { readFile, unlink } = require("fs").promises;
 
 module.exports = class GraphAPI {
@@ -227,7 +227,7 @@ module.exports = class GraphAPI {
         this.lock = false;
         console.log("Download All done");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.log(error.message);
     }
   }
