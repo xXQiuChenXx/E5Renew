@@ -1,19 +1,22 @@
 import Downloader from "nodejs-file-downloader";
 const { readFile, unlink } = require("fs").promises;
+import { Client } from "@microsoft/microsoft-graph-client";
 
 module.exports = class GraphAPI {
-  constructor(client) {
+  client: Client;
+  lock: boolean;
+  constructor(client: Client) {
     this.lock = false;
     if (!client) {
       throw new Error("Graph has not been initialized for user auth");
     }
-    this._userClient = client;
+    this.client = client;
   }
 
   async _getUser(
     select = ["displayName", "mail", "userPrincipalName", "jobTitle"]
   ) {
-    return await this._userClient
+    return await this.client
       .api("/me")
       // Only request specific properties
       .select(select)
@@ -21,7 +24,7 @@ module.exports = class GraphAPI {
   }
 
   async _getInbox() {
-    return await this._userClient
+    return await this.client
       .api("/me/mailFolders/inbox/messages")
       .select(["from", "isRead", "receivedDateTime", "subject"])
       .top(25)
@@ -69,7 +72,7 @@ module.exports = class GraphAPI {
     };
 
     // Send the message
-    return await this._userClient.api("me/sendMail").post({
+    return await this.client.api("me/sendMail").post({
       message: message,
     });
   }
@@ -98,7 +101,7 @@ module.exports = class GraphAPI {
   }
 
   async _getDrive() {
-    let res = await this._userClient.api("/me/drive").get();
+    let res = await this.client.api("/me/drive").get();
     return {
       id: res.id,
       name: res.name,
@@ -127,16 +130,16 @@ module.exports = class GraphAPI {
   }
 
   async listFolder() {
-    let res = await this._userClient.api("/me/drive/root/children").get();
+    let res = await this.client.api("/me/drive/root/children").get();
     console.log(res);
   }
 
   async createFolderIfNotExists(folderName = "Dev Folder") {
-    let folder = await this._userClient
+    let folder = await this.client
       .api(`/me/drive/root/search(q='${folderName}')`)
       .get();
     if (!folder.value.length) {
-      await this._userClient.api("/me/drive/root/children").post({
+      await this.client.api("/me/drive/root/children").post({
         name: folderName,
         folder: {},
         "@microsoft.graph.conflictBehavior": "rename",
@@ -145,11 +148,11 @@ module.exports = class GraphAPI {
   }
 
   async _getItems(folderName = "Dev Folder") {
-    let folder = await this._userClient
+    let folder = await this.client
       .api(`/me/drive/root/search(q='${folderName}')`)
       .get();
     let id = folder.value[0].id;
-    return await this._userClient.api(`/me/drive/items/${id}/children`).get();
+    return await this.client.api(`/me/drive/items/${id}/children`).get();
   }
 
   async makeGraphCall() {
@@ -157,9 +160,9 @@ module.exports = class GraphAPI {
       await this.logDriveInfo();
       await this.createFolderIfNotExists("Dev Folder");
       await this.listAndDel();
-      setTimeout(this.uploadFile, random());
-      setTimeout(this.downloadFile, random());
-    } catch (err) {
+      setTimeout(this.uploadFile, this.random());
+      setTimeout(this.downloadFile, this.random());
+    } catch (err: any) {
       console.log(err.message);
     }
   }
@@ -184,14 +187,14 @@ module.exports = class GraphAPI {
       const items = await this._getItems("Dev Folder");
       console.log(
         `\nFoynded Items (${items?.value?.length}): \n` +
-        items?.value
-          ?.map((item, i) => {
-            return `${i + 1}. ${item.name} (${item.size} bytes) - ${item.id}`;
-          })
-          .join("\n")
+          items?.value
+            ?.map((item: any, i: number) => {
+              return `${i + 1}. ${item.name} (${item.size} bytes) - ${item.id}`;
+            })
+            .join("\n")
       );
       for (const item of items.value) {
-        await this._userClient
+        await this.client
           .api(`/me/drive/items/${item.id}/permanentDelete`)
           .post();
         console.log("Deleted: " + item.name);
@@ -202,7 +205,7 @@ module.exports = class GraphAPI {
   async downloadFile() {
     try {
       const items = await this._getItems();
-      const res = await this._userClient
+      const res = await this.client
         .api(`/me/drive/items/${items.value[0].id}`)
         .get();
       const url = res["@microsoft.graph.downloadUrl"];
@@ -263,7 +266,7 @@ module.exports = class GraphAPI {
       // Create a OneDrive upload task
       const uploadTask =
         await OneDriveLargeFileUploadTask.createTaskWithFileObject(
-          this._userClient,
+          this.client,
           fileUpload,
           options
         );
@@ -275,7 +278,7 @@ module.exports = class GraphAPI {
       // item being uploaded. For OneDrive, this is a DriveItem
       const driveItem = uploadResult.responseBody;
       console.log(`Uploaded file with ID: ${driveItem.id}`);
-    } catch (error) {
+    } catch (error: any) {
       console.log(error.message);
     }
     this.lock = false;

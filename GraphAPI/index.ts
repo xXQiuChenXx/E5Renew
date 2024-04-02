@@ -33,7 +33,8 @@ class GraphAPIClient {
       authProvider: authProvider,
     });
 
-    await authProvider.getAccessToken();
+    const accessToken = await authProvider.getAccessToken();
+    console.log(accessToken)
   }
 
   _getClient() {
