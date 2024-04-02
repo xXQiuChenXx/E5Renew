@@ -23,12 +23,14 @@
   },
   "homepage": "https://github.com/xXQiuChenXx/E5Renew#readme",
   "dependencies": {
+    "@azure/identity": "^4.0.1",
     "@microsoft/microsoft-graph-client": "^3.0.7",
     "dotenv": "^16.4.5",
     "express": "^4.18.2",
     "nodejs-file-downloader": "^4.12.1"
   },
   "devDependencies": {
+    "@microsoft/microsoft-graph-types": "^2.40.0",
     "@types/express": "^4.17.21",
     "@types/node": "^20.11.21",
     "tsx": "^4.7.1",

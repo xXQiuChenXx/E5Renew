@@ -2,8 +2,9 @@
 // Licensed under the MIT license.
 
 import "dotenv/config"
+import { settings as settingsType } from "types";
 
-const settings = {
+const settings: settingsType = {
     'clientId': process.env.CLIENT_ID || "",
     "port": process.env.PORT || "",
     'tenantId': 'common',
