@@ -5,6 +5,7 @@ import { User, Message } from "@microsoft/microsoft-graph-types";
 import { settings } from "types";
 import { readFileSync, readdirSync } from "fs";
 import { GraphAPI } from "./utils";
+import msal from "@azure/msal-node";
 
 class GraphAPIClient {
   #settings: settings;
@@ -15,6 +16,22 @@ class GraphAPIClient {
 
   async login() {
     const settings = this.#settings;
+    const testClient = new msal.PublicClientApplication({
+      auth: {
+        clientId: settings.clientId,
+      },
+    })
+    const res = await testClient.acquireTokenByDeviceCode({
+      scopes: settings.graphUserScopes,
+      deviceCodeCallback: (response) => {
+        console.log(response)
+      }
+    })
+    console.log(res);
+
+    
+    
+    return;
     const deviceCodeCredential = new DeviceCodeCredential({
       clientId: settings.clientId,
       tenantId: settings.tenantId,

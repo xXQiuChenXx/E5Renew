@@ -1,5 +1,6 @@
 export type settings = {
     'clientId': string,
+    "clientSecret": string,
     "port": string,
     'tenantId': string,
     'graphUserScopes': Array<
@@ -9,7 +10,8 @@ export type settings = {
         'files.read' |
         'files.read.all' |
         'Files.ReadWrite' |
-        'Files.ReadWrite.All'
+        'Files.ReadWrite.All' | 
+        "offline_access"
     >,
     'folderName': string
 };
