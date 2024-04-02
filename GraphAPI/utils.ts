@@ -2,7 +2,7 @@ import Downloader from "nodejs-file-downloader";
 const { readFile, unlink } = require("fs").promises;
 import { Client } from "@microsoft/microsoft-graph-client";
 
-module.exports = class GraphAPI {
+export class GraphAPI {
   client: Client;
   lock: boolean;
   constructor(client: Client) {

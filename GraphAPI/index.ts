@@ -4,6 +4,7 @@ import { DeviceCodeInfo, DeviceCodeCredential } from "@azure/identity";
 import { User, Message } from "@microsoft/microsoft-graph-types";
 import { settings } from "types";
 import { readFileSync, readdirSync } from "fs";
+import { GraphAPI } from "./utils";
 
 class GraphAPIClient {
   #settings: settings;
@@ -34,7 +35,9 @@ class GraphAPIClient {
     });
 
     const accessToken = await authProvider.getAccessToken();
-    console.log(accessToken)
+    const graphAPI = new GraphAPI(this.#client);
+    const response = await graphAPI._getInbox();
+    console.log(response);
   }
 
   _getClient() {
