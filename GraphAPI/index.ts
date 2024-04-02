@@ -23,48 +23,34 @@ class GraphAPIClient {
       cache: {
         cachePlugin: {
           async beforeCacheAccess(tokenCacheContext) {
-            if (existsSync("./cache.txt")) {
-              const cache = await readFileSync("./cache.txt", "utf-8");
+            if (existsSync("./cache.json")) {
+              const cache = await readFileSync("./cache.json", "utf-8");
               await tokenCacheContext.tokenCache.deserialize(cache);
             }
           },
           async afterCacheAccess(tokenCacheContext) {
             const cache = await tokenCacheContext.tokenCache.serialize();
-            await writeFileSync("./cache.txt", cache, "utf-8");
+            await writeFileSync("./cache.json", cache, "utf-8");
           },
         },
       },
     });
-    
+
     const res = await testClient.acquireTokenByDeviceCode({
       scopes: settings.graphUserScopes,
       deviceCodeCallback: (response) => {
         console.log(response);
       },
     });
-    console.log(res);
 
-    return;
-    const deviceCodeCredential = new DeviceCodeCredential({
-      clientId: settings.clientId,
-      tenantId: settings.tenantId,
-      userPromptCallback: (info: DeviceCodeInfo) => {
-        console.log(info.message);
-      },
-    });
+    if(!res?.accessToken) return;
 
-    const authProvider = new TokenCredentialAuthenticationProvider(
-      deviceCodeCredential,
-      {
-        scopes: settings.graphUserScopes,
+    this.#client = Client.init({
+      authProvider: (done) => {
+        done(null, res.accessToken)
       }
-    );
+    })
 
-    this.#client = Client.initWithMiddleware({
-      authProvider: authProvider,
-    });
-
-    const accessToken = await authProvider.getAccessToken();
     const graphAPI = new GraphAPI(this.#client);
     const response = await graphAPI._getInbox();
     console.log(response);
