@@ -3,7 +3,7 @@ import { TokenCredentialAuthenticationProvider } from "@microsoft/microsoft-grap
 import { DeviceCodeInfo, DeviceCodeCredential } from "@azure/identity";
 import { User, Message } from "@microsoft/microsoft-graph-types";
 import { settings } from "types";
-import { readFileSync, readdirSync } from "fs";
+import { existsSync, readFileSync, readdirSync, writeFileSync } from "fs";
 import { GraphAPI } from "./utils";
 import msal from "@azure/msal-node";
 
@@ -20,17 +20,30 @@ class GraphAPIClient {
       auth: {
         clientId: settings.clientId,
       },
-    })
+      cache: {
+        cachePlugin: {
+          async beforeCacheAccess(tokenCacheContext) {
+            if (existsSync("./cache.txt")) {
+              const cache = await readFileSync("./cache.txt", "utf-8");
+              await tokenCacheContext.tokenCache.deserialize(cache);
+            }
+          },
+          async afterCacheAccess(tokenCacheContext) {
+            const cache = await tokenCacheContext.tokenCache.serialize();
+            await writeFileSync("./cache.txt", cache, "utf-8");
+          },
+        },
+      },
+    });
+    
     const res = await testClient.acquireTokenByDeviceCode({
       scopes: settings.graphUserScopes,
       deviceCodeCallback: (response) => {
-        console.log(response)
-      }
-    })
+        console.log(response);
+      },
+    });
     console.log(res);
 
-    
-    
     return;
     const deviceCodeCredential = new DeviceCodeCredential({
       clientId: settings.clientId,
