@@ -69,6 +69,11 @@ class GraphAPIClient {
 
   async test() {
     const graphAPI = new GraphAPI(this.client);
+    await graphAPI.getInboxAsync();
+    await graphAPI.logDriveInfo();
+    await graphAPI.uploadFile();
+    await graphAPI.listAndDel();
+    // await graphAPI.sendEmailAsync();
   }
 
   async start() {

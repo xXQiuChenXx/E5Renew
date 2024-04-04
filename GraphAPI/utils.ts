@@ -1,6 +1,10 @@
 import Downloader from "nodejs-file-downloader";
 const { readFile, unlink } = require("fs").promises;
-import { Client } from "@microsoft/microsoft-graph-client";
+import {
+  Client,
+  FileUpload,
+  OneDriveLargeFileUploadTask,
+} from "@microsoft/microsoft-graph-client";
 import { API } from "./api";
 
 export class GraphAPI {
@@ -150,25 +154,33 @@ export class GraphAPI {
     }
   }
 
+  createInMemoryArrayBuffer(fileSize: number): ArrayBuffer {
+    const buffer = new ArrayBuffer(fileSize);
+    const view = new Uint8Array(buffer); // Uint8Array for byte access
+
+    // Fill the buffer with repetitive data (optional)
+    for (let i = 0; i < fileSize; i++) {
+      view[i] = Math.floor(Math.random() * 256); // Random byte values
+    }
+
+    return buffer;
+  }
+
   async uploadFile() {
     this.lock = true;
     try {
-      const {
-        FileUpload,
-        OneDriveLargeFileUploadTask,
-      } = require("@microsoft/microsoft-graph-client");
-
-      const file = await readFile("./file.zip");
-      const fileName = "file.zip";
+      const fileName = "files.zip";
+      const fileSize = 1024 * 1024 * 100;
+      const file = this.createInMemoryArrayBuffer(fileSize);
 
       const options = {
         // Relative path from root folder
         path: "Dev Folder",
         fileName: fileName,
-        rangeSize: 1024 * 1024,
+        rangeSize: fileSize,
         uploadEventHandlers: {
           // Called as each "slice" of the file is uploaded
-          progress: (range, _) => {
+          progress: (range: any, _: any) => {
             console.log(
               `Uploaded bytes ${range?.minValue} to ${range?.maxValue}`
             );
@@ -177,7 +189,7 @@ export class GraphAPI {
       };
 
       // Create FileUpload object
-      const fileUpload = new FileUpload(file, fileName, file.byteLength);
+      const fileUpload = new FileUpload(file, fileName, fileSize);
       // Create a OneDrive upload task
       const uploadTask =
         await OneDriveLargeFileUploadTask.createTaskWithFileObject(
@@ -191,7 +203,7 @@ export class GraphAPI {
 
       // The response body will be of the corresponding type of the
       // item being uploaded. For OneDrive, this is a DriveItem
-      const driveItem = uploadResult.responseBody;
+      const driveItem: any = uploadResult.responseBody;
       console.log(`Uploaded file with ID: ${driveItem.id}`);
     } catch (error: any) {
       console.log(error.message);
