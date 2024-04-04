@@ -11,6 +11,7 @@ export class GraphAPI {
   private lock: boolean;
   private client: Client;
   private api: API;
+  private file: ArrayBuffer;
 
   constructor(client: Client) {
     this.lock = false;
@@ -19,6 +20,7 @@ export class GraphAPI {
     }
     this.client = client;
     this.api = new API(client);
+    this.file = this.createInMemoryArrayBuffer(1024 * 1024 * 100);
   }
 
   async getInboxAsync() {
@@ -170,8 +172,8 @@ export class GraphAPI {
     this.lock = true;
     try {
       const fileName = "files.zip";
-      const fileSize = 1024 * 1024 * 100;
-      const file = this.createInMemoryArrayBuffer(fileSize);
+      const file = this.file;
+      const fileSize = file.byteLength;
 
       const options = {
         // Relative path from root folder
