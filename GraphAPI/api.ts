@@ -68,9 +68,9 @@ export class API {
     return folders;
   }
 
-  async findChildrens(folderName = "Dev Folder") {
-    let folder = await this.findItems({ search: folderName });
-    let id = folder.value[0].id;
+  async findChildrens({ folder }: { folder: string }) {
+    let items = await this.findItems({ search: folder });
+    let id = items.value[0].id;
     return await this.client.api(`/me/drive/items/${id}/children`).get();
   }
 

@@ -82,18 +82,6 @@ export class GraphAPI {
     }
   }
 
-  async makeGraphCall() {
-    try {
-      await this.logDriveInfo();
-      await this.createFolder("Dev Folder");
-      await this.listAndDel();
-      setTimeout(this.uploadFile, this.random());
-      setTimeout(this.downloadFile, this.random());
-    } catch (err: any) {
-      console.log(err.message);
-    }
-  }
-
   random() {
     const minMilliseconds = 30 * 60 * 100; // 10 minutes in milliseconds
     const maxMilliseconds = 60 * 60 * 1000; // 20 minutes in milliseconds
@@ -111,9 +99,9 @@ export class GraphAPI {
 
   async listAndDel() {
     if (!this.lock) {
-      const items = await this._getItems("Dev Folder");
+      const items = await this.api.findChildrens({ folder: "Dev Folder" });
       console.log(
-        `\nFoynded Items (${items?.value?.length}): \n` +
+        `\nFounded Items (${items?.value?.length}): \n` +
           items?.value
             ?.map((item: any, i: number) => {
               return `${i + 1}. ${item.name} (${item.size} bytes) - ${item.id}`;
@@ -123,7 +111,7 @@ export class GraphAPI {
       for (const item of items.value) {
         await this.client
           .api(`/me/drive/items/${item.id}/permanentDelete`)
-          .post();
+          .post({});
         console.log("Deleted: " + item.name);
       }
     }
@@ -131,7 +119,7 @@ export class GraphAPI {
 
   async downloadFile() {
     try {
-      const items = await this._getItems();
+      const items = await this.api.findChildrens({ folder: "Dev Folder" });
       const res = await this.client
         .api(`/me/drive/items/${items.value[0].id}`)
         .get();
@@ -209,6 +197,5 @@ export class GraphAPI {
       console.log(error.message);
     }
     this.lock = false;
-    await this.makeGraphCall();
   }
 }
