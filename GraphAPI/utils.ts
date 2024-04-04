@@ -1,5 +1,5 @@
 import Downloader from "nodejs-file-downloader";
-const { readFile, unlink } = require("fs").promises;
+const { unlink } = require("fs").promises;
 import {
   Client,
   FileUpload,
@@ -89,8 +89,8 @@ export class GraphAPI {
   }
 
   random() {
-    const minMilliseconds = 30 * 60 * 100; // 10 minutes in milliseconds
-    const maxMilliseconds = 60 * 60 * 1000; // 20 minutes in milliseconds
+    const minMilliseconds = 1 * 60 * 1000; // 1 minutes in milliseconds
+    const maxMilliseconds = 3 * 60 * 1000; // 3 minutes in milliseconds
 
     // Generate a random decimal number between 0 and 1
     const randomDecimal = Math.random();
@@ -123,36 +123,40 @@ export class GraphAPI {
     }
   }
 
+  shuffleArray<T>(array: T[]): T[] {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  }
+
   async downloadFile() {
-    try {
-      const items = await this.api.findChildrens({ folder: "Dev Folder" });
-      const res = await this.client
-        .api(`/me/drive/items/${items.value[0].id}`)
-        .get();
-      const url = res["@microsoft.graph.downloadUrl"];
+    const items = await this.api.findChildrens({ folder: "Dev Folder" });
+    const res = await this.client
+      .api(`/me/drive/items/${items.value[0].id}`)
+      .get();
+    const url = res["@microsoft.graph.downloadUrl"];
 
-      if (url) {
-        console.log("Downloading " + res.name);
+    if (url) {
+      console.log("Downloading " + res.name);
 
-        this.lock = true;
+      this.lock = true;
 
-        const downloader = new Downloader({
-          url: url, //If the file name already exists, a new file with the name 200MB1.zip is created.
-          directory: "./downloads", //This folder will be created, if it doesn't exist.
-          fileName: res.name,
-          onProgress: function (percentage, chunk, remainingSize) {
-            //Gets called with each chunk.
-            console.log(percentage, "%");
-            console.log("Remaining bytes: ", remainingSize);
-          },
-        });
-        const { filePath } = await downloader.download();
-        await unlink(filePath);
-        this.lock = false;
-        console.log("Download All done");
-      }
-    } catch (error: any) {
-      console.log(error.message);
+      const downloader = new Downloader({
+        url: url, //If the file name already exists, a new file with the name 200MB1.zip is created.
+        directory: "./downloads", //This folder will be created, if it doesn't exist.
+        fileName: res.name,
+        onProgress: function (percentage, chunk, remainingSize) {
+          //Gets called with each chunk.
+          console.log(percentage, "%");
+          console.log("Remaining bytes: ", remainingSize);
+        },
+      });
+      const { filePath } = await downloader.download();
+      await unlink(filePath);
+      this.lock = false;
+      console.log("Download All done");
     }
   }
 

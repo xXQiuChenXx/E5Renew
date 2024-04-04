@@ -63,21 +63,50 @@ class GraphAPIClient {
         },
       });
     } else {
-      console.log("Unable to Authenticate Your Account, Please Check Your Configurations then Restart the Application")
+      console.log(
+        "Unable to Authenticate Your Account, Please Check Your Configurations then Restart the Application"
+      );
     }
   }
 
   async test() {
     const graphAPI = new GraphAPI(this.client);
-    await graphAPI.getInboxAsync();
-    await graphAPI.logDriveInfo();
-    await graphAPI.uploadFile();
-    await graphAPI.listAndDel();
     // await graphAPI.sendEmailAsync();
   }
 
   async start() {
     const graphAPI = new GraphAPI(this.client);
+    const {
+      downloadFile,
+      uploadFile,
+      listAndDel,
+      logDriveInfo,
+      getInboxAsync,
+      shuffleArray,
+      random,
+    } = graphAPI;
+    const list = [
+      downloadFile,
+      uploadFile,
+      listAndDel,
+      logDriveInfo,
+      getInboxAsync,
+    ];
+    1;
+    setInterval(async () => {
+      const fns = shuffleArray(list);
+      let i = 1;
+      for (const fn of fns) {
+        setTimeout(async () => {
+          try {
+            await fn.bind(graphAPI)();
+          } catch (error: any) {
+            console.log(error);
+          }
+        }, random() + i * 60 * 1000);
+        i++;
+      }
+    }, 30 * 60 * 1000); 
   }
 
   _getClient() {
