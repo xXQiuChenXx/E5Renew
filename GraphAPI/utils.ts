@@ -85,7 +85,7 @@ export class GraphAPI {
   async makeGraphCall() {
     try {
       await this.logDriveInfo();
-      await this.createFolderIfNotExists("Dev Folder");
+      await this.createFolder("Dev Folder");
       await this.listAndDel();
       setTimeout(this.uploadFile, this.random());
       setTimeout(this.downloadFile, this.random());
