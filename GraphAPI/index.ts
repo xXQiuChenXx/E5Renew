@@ -24,7 +24,10 @@ class GraphAPIClient {
         cachePlugin: {
           async afterCacheAccess(tokenCacheContext) {
             const cache = await tokenCacheContext.tokenCache.serialize();
-            writeFileSync("./cache.json", JSON.stringify(JSON.parse(cache), null, 4));
+            writeFileSync(
+              "./cache.json",
+              JSON.stringify(JSON.parse(cache), null, 4)
+            );
           },
           async beforeCacheAccess(tokenCacheContext) {
             if (existsSync("./cache.json")) {
@@ -53,19 +56,23 @@ class GraphAPIClient {
       });
     }
 
-    console.log(res);
+    if (res.accessToken) {
+      this.client = Client.init({
+        authProvider: (done) => {
+          done(null, res.accessToken);
+        },
+      });
+    } else {
+      console.log("Unable to Authenticate Your Account, Please Check Your Configurations then Restart the Application")
+    }
+  }
 
-    if (!res?.accessToken) return;
-
-    this.client = Client.init({
-      authProvider: (done) => {
-        done(null, res.accessToken);
-      },
-    });
-
+  async test() {
     const graphAPI = new GraphAPI(this.client);
-    const response = await graphAPI._getInbox();
-    console.log(response);
+  }
+
+  async start() {
+    const graphAPI = new GraphAPI(this.client);
   }
 
   _getClient() {

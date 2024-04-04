@@ -1,40 +1,25 @@
 import Downloader from "nodejs-file-downloader";
 const { readFile, unlink } = require("fs").promises;
 import { Client } from "@microsoft/microsoft-graph-client";
+import { API } from "./api";
 
 export class GraphAPI {
-  client: Client;
-  lock: boolean;
+  private lock: boolean;
+  private client: Client;
+  private api: API;
+
   constructor(client: Client) {
     this.lock = false;
     if (!client) {
       throw new Error("Graph has not been initialized for user auth");
     }
     this.client = client;
-  }
-
-  async _getUser(
-    select = ["displayName", "mail", "userPrincipalName", "jobTitle"]
-  ) {
-    return await this.client
-      .api("/me")
-      // Only request specific properties
-      .select(select)
-      .get();
-  }
-
-  async _getInbox() {
-    return await this.client
-      .api("/me/mailFolders/inbox/messages")
-      .select(["from", "isRead", "receivedDateTime", "subject"])
-      .top(25)
-      .orderby("receivedDateTime DESC")
-      .get();
+    this.api = new API(client);
   }
 
   async getInboxAsync() {
     try {
-      const messagePage = await this._getInbox();
+      const messagePage = await this.api.getInbox();
       const messages = messagePage.value;
 
       // Output each message's details
@@ -54,65 +39,22 @@ export class GraphAPI {
     }
   }
 
-  async _sendEmail(subject: string, body: string, recipient: string) {
-    // Create a new message
-    const message = {
-      subject: subject,
-      body: {
-        content: body,
-        contentType: "text",
-      },
-      toRecipients: [
-        {
-          emailAddress: {
-            address: recipient,
-          },
-        },
-      ],
-    };
-
-    // Send the message
-    return await this.client.api("me/sendMail").post({
-      message: message,
-    });
-  }
-
   async sendEmailAsync() {
     try {
-      // Send mail to the signed-in user
-      // Get the user for their email address
-      const user = await this._getUser();
-      const userEmail = user?.mail ?? user?.userPrincipalName;
-
-      if (!userEmail) {
-        console.log("Couldn't get your email address, canceling...");
-        return;
-      }
-
-      await this._sendEmail(
-        "Testing Microsoft Graph",
-        "Hello world!",
-        "qiuchenlau@gmail.com"
-      );
+      await this.api.sendEmail({
+        subject: "Hello Microsoft Graph",
+        body: "Dear Sir/Madam, Welcome",
+        recipient: "superadmin@myitbuilder.net",
+      });
       console.log("Mail sent.");
     } catch (err) {
       console.log(`Error sending mail: ${err}`);
     }
   }
 
-  async _getDrive() {
-    let res = await this.client.api("/me/drive").get();
-    return {
-      id: res.id,
-      name: res.name,
-      type: res.driveType,
-      quota: res.quota,
-    };
-  }
-
   async logDriveInfo() {
     try {
-      let drive = await this._getDrive();
+      let drive = await this.api.getDrive();
       console.log(
         "================================================================"
       );
@@ -129,15 +71,8 @@ export class GraphAPI {
     }
   }
 
-  async listFolder() {
-    let res = await this.client.api("/me/drive/root/children").get();
-    console.log(res);
-  }
-
-  async createFolderIfNotExists(folderName = "Dev Folder") {
-    let folder = await this.client
-      .api(`/me/drive/root/search(q='${folderName}')`)
-      .get();
+  async createFolder(folderName = "Dev Folder") {
+    let folder = await this.api.findItems({ search: folderName });
     if (!folder.value.length) {
       await this.client.api("/me/drive/root/children").post({
         name: folderName,
@@ -145,14 +80,6 @@ export class GraphAPI {
         "@microsoft.graph.conflictBehavior": "rename",
       });
     }
-  }
-
-  async _getItems(folderName = "Dev Folder") {
-    let folder = await this.client
-      .api(`/me/drive/root/search(q='${folderName}')`)
-      .get();
-    let id = folder.value[0].id;
-    return await this.client.api(`/me/drive/items/${id}/children`).get();
   }
 
   async makeGraphCall() {
@@ -284,4 +211,4 @@ export class GraphAPI {
     this.lock = false;
     await this.makeGraphCall();
   }
-};
+}
