@@ -9,12 +9,11 @@ for renew e5 subscribtion.
    git clone https://github.com/xXQiuChenXx/E5Renew.git
    cd E5Renew
    ```
+2. Run both two commands
+   ```
+   npm install
+   npm start
+   ```
 
-3. Run both two commands
-  ```
-  npm install
-  npm start
-  ```
 
-
-end
+Enjoy the code
