@@ -93,20 +93,18 @@ class GraphAPIClient {
       getInboxAsync,
     ];
     1;
-    setInterval(async () => {
-      const fns = shuffleArray(list);
-      let i = 1;
-      for (const fn of fns) {
-        setTimeout(async () => {
-          try {
-            await fn.bind(graphAPI)();
-          } catch (error: any) {
-            console.log(error);
-          }
-        }, random() + i * 60 * 1000);
-        i++;
-      }
-    }, 30 * 60 * 1000); 
+    const fns = shuffleArray(list);
+    let i = 1;
+    for (const fn of fns) {
+      setTimeout(async () => {
+        try {
+          await fn.bind(graphAPI)();
+        } catch (error: any) {
+          console.log(error);
+        }
+      }, random() + i * 60 * 1000);
+      i++;
+    }
   }
 
   _getClient() {
