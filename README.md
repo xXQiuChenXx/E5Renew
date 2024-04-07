@@ -3,6 +3,8 @@
 Microsoft Graph API tools Build with Typescript
 for renew e5 subscription, Office Developer Program.
 
+测试过了，如果用来刷新订阅是没什么问题的。
+
 ## Getting Started
 1. Clone Repo
    ```
