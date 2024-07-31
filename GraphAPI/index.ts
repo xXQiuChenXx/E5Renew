@@ -92,7 +92,6 @@ class GraphAPIClient {
       logDriveInfo,
       getInboxAsync,
     ];
-    1;
     const fns = shuffleArray(list);
     let i = 1;
     for (const fn of fns) {
